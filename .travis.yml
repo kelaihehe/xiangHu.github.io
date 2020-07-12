@@ -1,0 +1,18 @@
+sudo: false
+language: node_js
+node_js:
+  - 12
+cache: npm
+branches:
+  only:
+    - hexoSource # 只有当hexoSource分支被提交时才触发build，这里是源码分支
+script:
+  - hexo generate
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GH_TOKEN
+  keep-history: true
+  on:
+    branch: master   #将静态页面部署到哪个分支
+  local-dir: public
