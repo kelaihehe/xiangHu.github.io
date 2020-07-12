@@ -5,7 +5,7 @@ node_js:
 cache: npm
 branches:
   only:
-    - hexoSource # 只有当hexoSource分支被提交时才触发build，这里是源码分支
+    - master # 只有当master分支被提交时才触发build，这里是源码分支
 script:
   - hexo generate
 deploy:
