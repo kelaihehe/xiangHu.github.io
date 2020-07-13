@@ -7,6 +7,13 @@ Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [docume
 
 ### Create a new post
 
+
+``` java
+阿萨德发生的阿斯顿
+阿斯蒂芬爱上收到发生大幅阿斯顿
+```
+
+
 ``` bash
 $ hexo new "My New Post"
 ```

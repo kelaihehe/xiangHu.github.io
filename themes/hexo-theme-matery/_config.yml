@@ -116,8 +116,8 @@ recommend:
 
 # Configure website favicon and LOGO
 # 配置网站favicon和网站LOGO
-favicon: /favicon.png
-logo: /medias/logo.png
+favicon: /favicon1.png
+logo: /medias/logo2.png
 
 # The configuration of the second button in the home banner,
 # including the display name of the button, the font awesome icon, and the hyperlink to the button.
@@ -382,8 +382,8 @@ verifyPassword:
 # 不蒜子(http://busuanzi.ibruce.info/) 网站统计
 busuanziStatistics:
   enable: false
-  totalTraffic: true # 总访问量
-  totalNumberOfvisitors: true # 总人次
+  totalTraffic: false # 总访问量
+  totalNumberOfvisitors: false # 总人次
 
 # Add google analytics configuration
 # 添加 Google Analytics 配置
@@ -579,3 +579,4 @@ jsDelivr:
 ##############################自定义##########################3
 postCharts:   #是否展示about中的文章统计图
   enable: false
+

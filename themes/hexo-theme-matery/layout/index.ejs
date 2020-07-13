@@ -111,7 +111,7 @@
                     <div class="card-action article-tags">
                         <% post.tags.forEach(tag => { %>
                         <a href="<%- url_for(tag.path) %>">
-                            <span class="chip bg-color"><%= tag.name %></span>
+                            <span class="chip tag-bg-color"><%= tag.name %></span>
                         </a>
                         <% }); %>
                     </div>

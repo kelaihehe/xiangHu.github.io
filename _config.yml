@@ -4,7 +4,7 @@
 
 # Site
 title: 小卡车哐哐哐
-subtitle: '小卡车哐哐哐'
+subtitle: '小卡车哐哐哐的博客'
 description: ''
 keywords:
 author: XIANG HU
@@ -41,16 +41,22 @@ external_link:
   exclude: ''
 filename_case: 0
 render_drafts: false
-post_asset_folder: false
+post_asset_folder: true
 relative_link: false
 future: true
 highlight:
-  enable: true
+  enable: false
   line_number: true
   auto_detect: false
   tab_replace: ''
   wrap: true
   hljs: false
+#代码高亮
+prism_plugin:
+  mode: 'preprocess'    # realtime/preprocess
+  theme: 'tomorrow'
+  line_number: true    # default false
+  custom_css:
 
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
