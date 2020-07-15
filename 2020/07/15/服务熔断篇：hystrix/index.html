@@ -1,0 +1,1025 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="服务熔断篇：hystrix, 小卡车哐哐哐">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>服务熔断篇：hystrix | 小卡车哐哐哐</title>
+    <link rel="icon" type="image/png" href="/favicon1.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo2.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">小卡车哐哐哐</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo2.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">小卡车哐哐哐</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/17.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">服务熔断篇：hystrix</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        height: calc(100vh - 250px);
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/SpringCloud/">
+                                <span class="chip bg-color">SpringCloud</span>
+                            </a>
+                        
+                            <a href="/tags/hystrix/">
+                                <span class="chip bg-color">hystrix</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/SpringCloud/" class="post-category">
+                                SpringCloud
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-07-15
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>熔断器Hystrix是一种容错框架，包括线程/信号量隔离，服务降级、服务熔断，服务限流，提供分布式系统的弹性</p>
+<h3 id="什么是服务降级？"><a href="#什么是服务降级？" class="headerlink" title="什么是服务降级？"></a>什么是服务降级？</h3><ul>
+<li>如果服务器出现超时或程序运行异常等，不能让客户端等太久或返回客户端一个不好的错误页面，而应该返回一个友好提示。</li>
+<li>换句话说，如果主逻辑出现问题，应该换一个备用逻辑使用</li>
+<li>一般在最外层的服务使用服务降级</li>
+</ul>
+<h3 id="什么是服务熔断？"><a href="#什么是服务熔断？" class="headerlink" title="什么是服务熔断？"></a>什么是服务熔断？</h3><ul>
+<li>仍是服务器出现问题，可以用服务降级来处理。但仍会有一些请求进来，并走主逻辑，这样仍会占用服务资源。</li>
+<li>如果干脆在未来一段时间内容，拦截所有请求，即打开熔断器，全部直接走备用逻辑，给服务器一个缓冲时间。当一段时间过后，再尝试接受部分请求，走主逻辑，如果服务正常，那么就关闭熔断器，恢复服务运行。</li>
+</ul>
+<h3 id="服务降级和服务熔断的关系"><a href="#服务降级和服务熔断的关系" class="headerlink" title="服务降级和服务熔断的关系"></a>服务降级和服务熔断的关系</h3><ul>
+<li>类似于springboot和springcloud的关系）</li>
+<li>服务熔断需要依赖服务降级。</li>
+<li>服务熔断只是服务降级的条件之一。</li>
+</ul>
+<h3 id="什么是服务限流？"><a href="#什么是服务限流？" class="headerlink" title="什么是服务限流？"></a>什么是服务限流？</h3><ul>
+<li>待续</li>
+</ul>
+<h3 id="分布式框架出现的服务雪崩问题"><a href="#分布式框架出现的服务雪崩问题" class="headerlink" title="分布式框架出现的服务雪崩问题"></a>分布式框架出现的服务雪崩问题</h3><ul>
+<li>在分布式框架中，多个微服务之间进行调用。假如：微服务A调用微服务B，微服务B又调用了微服务C，微服务C又调用了其他的微服务，这称之为“扇出”。</li>
+<li>当扇出的链路上的某个微服务的调用响应时间过长或不可用，那么对微服务A的调用就会占用越来越多的系统资源，从而引发系统雪崩</li>
+</ul>
+<h3 id="服务熔断和服务降级的同异"><a href="#服务熔断和服务降级的同异" class="headerlink" title="服务熔断和服务降级的同异"></a>服务熔断和服务降级的同异</h3><ul>
+<li>同：对于用户而言，二者都使其体验到某些功能暂时不可用</li>
+<li>异：<ul>
+<li>触发条件不一样：服务熔断一般是在某个服务故障引起的，而服务降级一般是从整体负荷考虑</li>
+<li>管理目标的层次不一样：服务熔断几乎每个微服务都需要；但是降级一般可能只需要在某些业务微服务进行</li>
+</ul>
+</li>
+</ul>
+<h3 id="hystrix的参数配置"><a href="#hystrix的参数配置" class="headerlink" title="hystrix的参数配置"></a>hystrix的参数配置</h3><ul>
+<li>官网： <a href="https://github.com/Netflix/Hystrix/wiki/Configuration" target="_blank" rel="noopener">https://github.com/Netflix/Hystrix/wiki/Configuration</a></li>
+<li>中文：<a href="https://www.cnblogs.com/520playboy/p/8074347.html" target="_blank" rel="noopener">https://www.cnblogs.com/520playboy/p/8074347.html</a></li>
+<li>一些关键配置：<ul>
+<li>Execution前缀的属性配置：<pre><code>execution.isolation.strategy 隔离策略，默认是Thread, 可选Thread｜Semaphore
+https://www.jianshu.com/p/df1525d58c20
+https://www.jianshu.com/p/af8dc67e5238
+execution.timeout.enabled 执行是否启用超时，默认启用true
+execution.isolation.thread.timeoutInMilliseconds 命令执行超时时间，默认1000ms
+Circuit Breaker前缀的属性配置
+circuitBreaker.enabled：默认true，用来跟踪circuit的健康性，如果未达标则让request短路。
+circuitBreaker.requestVolumeThreshold：默认20，一个rolling window内最小的请求数。如果设为20，那么当一个rolling window的时间内（比如说1个rolling window是10秒）收到19个请求，即使19个请求都失败，也不会触发circuit break。
+circuitBreaker.sleepWindowInMilliseconds：默认5000ms，触发短路的时间值，当该值设为5000时，则当触发circuit break后的5000毫秒内都会拒绝request，也就是5000毫秒后才会关闭circuit。
+circuitBreaker.errorThresholdPercentage：默认50，错误比率阀值，如果错误率&gt;=该值，circuit会被打开，并短路所有请求触发fallback。
+circuitBreaker.forceOpen 强制打开熔断器
+circuitBreaker.forceClosed 强制关闭熔断器
+metrics前缀的属性配置
+metrics.rollingPercentile.enabled 执行时是否enable指标的计算和跟踪，默认true
+metrics.rollingPercentile.timeInMilliseconds 设置rolling percentile window的时间，默认10000</code></pre></li>
+</ul>
+<ul>
+<li>默认配置下的服务熔断：<ul>
+<li>在timeInMilliseconds（10s）时间内的错误率大于errorThresholdPercentage（50%） || 在timeInMilliseconds（10s）时间中，超过requestVolumeThreshold（20）个请求，将打开断路器，并沉默sleepWindowInMilliseconds（5s）时间，进入开启状态，不再接受请求，并进行服务降级。</li>
+<li>时间过后，进入半关闭状态，尝试接受一次请求，若成功，再恢复到关闭状态，否则继续开启，重新休眠计时</li>
+</ul>
+</li>
+<li>默认配置下的服务降级：<ul>
+<li>触发服务降级的条件：<ul>
+<li>1、出现异常</li>
+<li>2、执行时间超时：超过timeoutInMilliseconds（1s）</li>
+<li>3、服务熔断开启</li>
+<li>4、线程池 / 信号量打满也会导致服务降级</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="服务降级"><a href="#服务降级" class="headerlink" title="服务降级"></a>服务降级</h2><ul>
+<li><p>依赖（如果有feign，则不需要，因为fegin集成了hystrix）</p>
+<pre class="line-numbers language-xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.cloud<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-cloud-starter-netflix-hystrix<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li><p>启动类上添加</p>
+<ul>
+<li>@EnableCircuitBreaker</li>
+</ul>
+</li>
+<li><p>使用方式：</p>
+<ul>
+<li>1、在每个方法上添加@HystrixCommand注解，并添加属性fallbackMethod， 表示为该方法指定fallback方法。@HystrixCommand可以放在controller方法和service方法上。<ul>
+<li>如果该方法触发了Hystrix条件，则会调用回调方法<pre class="line-numbers language-java"><code class="language-java"><span class="token comment" spellcheck="true">//指定回调方法</span>
+<span class="token annotation punctuation">@HystrixCommand</span><span class="token punctuation">(</span>fallbackMethod<span class="token operator">=</span><span class="token string">"paymentInfo_TimeOutHandler"</span><span class="token punctuation">)</span>   <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+</ul>
+</li>
+<li>2、在@DefaultProperties(defaultFallback = “globalFallBackMethod”)，同时在需要进行降级的方法上添加@HystrixCommand，但不声明fallbackMethod属性，表示使用默认的defaultFallback。@DefaultProperties只能放在类上<img src="/2020/07/15/%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E7%AF%87%EF%BC%9Ahystrix/Image1.png" class="">
+</li>
+</ul>
+</li>
+<li><p>配置hystrix参数  (参数名从HystrixCommandProperties类中找)</p>
+<ul>
+<li>1、通过注解<ul>
+<li>@HystrixCommand和@DefaultProperties都有一个属性：commandProperties，通过commandProperties对服务降级条件和服务熔断条件设置</li>
+<li>示例：设置超时时间<pre class="line-numbers language-java"><code class="language-java"><span class="token annotation punctuation">@HystrixCommand</span><span class="token punctuation">(</span>fallbackMethod <span class="token operator">=</span> <span class="token string">"paymentTimeOutFallBackMethod"</span><span class="token punctuation">,</span>commandProperties <span class="token operator">=</span> <span class="token punctuation">{</span>        <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token string">"execution.isolation.thread.timeoutInMilliseconds"</span><span class="token punctuation">,</span>value <span class="token operator">=</span> <span class="token string">"1500"</span><span class="token punctuation">)</span>  <span class="token comment" spellcheck="true">//设置该方法的执行时间不能超过1.5s，否则执行fallbackMethod})</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</li>
+<li>2、通过properties文件配置</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre class="line-numbers language-yaml"><code class="language-yaml">默认配置：
+<span class="token key atrule">hystrix</span><span class="token punctuation">:</span>
+  <span class="token key atrule">command</span><span class="token punctuation">:</span>
+    default   
+      <span class="token key atrule">execution</span><span class="token punctuation">:</span>
+        <span class="token key atrule">isolation</span><span class="token punctuation">:</span>
+          <span class="token key atrule">thread</span><span class="token punctuation">:</span>
+            <span class="token key atrule">timeoutInMilliseconds</span><span class="token punctuation">:</span> <span class="token number">500</span>
+
+<span class="token comment" spellcheck="true">#为某个具体方法定制的的配置  </span>
+<span class="token key atrule">hystrix</span><span class="token punctuation">:</span>
+  <span class="token key atrule">command</span><span class="token punctuation">:</span>
+<span class="token comment" spellcheck="true">#commandKey名规则在Feign类的configKey方法中定义了  </span>
+<span class="token comment" spellcheck="true">#commandKey名规则：类名#方法名（参数类型，参数类型）作为commandKey  </span>
+    "Service<span class="token comment" spellcheck="true">#getProduct(int)":  </span>
+      <span class="token key atrule">execution</span><span class="token punctuation">:</span>
+        <span class="token key atrule">isolation</span><span class="token punctuation">:</span>
+          <span class="token key atrule">thread</span><span class="token punctuation">:</span>
+            <span class="token key atrule">timeoutInMilliseconds</span><span class="token punctuation">:</span> <span class="token number">500</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="hystrix结合feign官网1-5节"><a href="#hystrix结合feign官网1-5节" class="headerlink" title="hystrix结合feign官网1.5节##"></a>hystrix结合feign<a href="https://cloud.spring.io/spring-cloud-static/spring-cloud-openfeign/2.2.0.RELEASE/reference/html/#spring-cloud-feign-hystrix-fallback" target="_blank" rel="noopener">官网1.5节</a>##</h2><ul>
+<li><p>feign实现了WebService接口来调用服务。如果想对这个服务调用的接口方法进行服务降级，不需要另写一个方法来调用该接口方法，再对该新方法服务降级，可以直接在feignClient注解上的属性fallback设置回调方法</p>
+</li>
+<li><p>properties文件配置：</p>
+<pre class="line-numbers language-yaml"><code class="language-yaml"><span class="token key atrule">feign</span><span class="token punctuation">:</span>
+<span class="token key atrule">hystrix</span><span class="token punctuation">:</span>
+  <span class="token key atrule">enabled</span><span class="token punctuation">:</span> <span class="token boolean important">true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li><p>注意：</p>
+<ul>
+<li>如果加了这个配置，将默认所有被FeignClient注解的类的方法都会被包装成HystrixCommand。</li>
+<li>如果不想所有的FeignClient注解的类都需要服务降级，那么需要加入configuration属性配置,如下</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token annotation punctuation">@FeignClient</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"CLOUD-PROVIDER-SERVICE"</span><span class="token punctuation">,</span>configuration <span class="token operator">=</span>FeignDisableHystrixConfiguration<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">FeignDisableHystrixConfiguration</span> <span class="token punctuation">{</span> 
+    <span class="token annotation punctuation">@Bean</span>
+    <span class="token annotation punctuation">@Scope</span><span class="token punctuation">(</span><span class="token string">"prototype"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> Feign<span class="token punctuation">.</span>Builder <span class="token function">feignBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> Feign<span class="token punctuation">.</span><span class="token function">builder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li><pre><code>  * feign.hystrix.enable=true之后，会默认注入HystrixFeign的bean，即实现了Hystrix的feign。而这里通过显式的方式，注入普通的Feign，表示不需要服务降级</code></pre></li>
+</ul>
+<ul>
+<li>在FeignClient的属性fallback设置回调实现类{% asset_img Image2.png  %}
+{% asset_img Image3.png  %}</li>
+<li>对于FeignClient这种方式，如何配置hystrix参数?<ul>
+<li>1、通过properties文件配置。与上面的一致</li>
+<li>2、通过feignClient注解的属性configuration<ul>
+<li>该configuration类不需要用@Configuration注解。但如果用了，需要注意：如果放在ComponentScan下，则会被当成全局配置</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre class="line-numbers language-java"><code class="language-java"><span class="token annotation punctuation">@ConditionalOnClass</span><span class="token punctuation">(</span><span class="token punctuation">{</span> HystrixCommand<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span> HystrixFeign<span class="token punctuation">.</span><span class="token keyword">class</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">protected</span> <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">HystrixFeignConfiguration</span> <span class="token punctuation">{</span>
+    <span class="token annotation punctuation">@Bean</span>
+    <span class="token annotation punctuation">@Scope</span><span class="token punctuation">(</span><span class="token string">"prototype"</span><span class="token punctuation">)</span>
+    <span class="token annotation punctuation">@ConditionalOnMissingBean</span>
+    <span class="token annotation punctuation">@ConditionalOnProperty</span><span class="token punctuation">(</span>name <span class="token operator">=</span> <span class="token string">"feign.hystrix.enabled"</span><span class="token punctuation">,</span> matchIfMissing <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> Feign<span class="token punctuation">.</span>Builder <span class="token function">feignHystrixBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> HystrixFeign<span class="token punctuation">.</span><span class="token function">builder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setterFactory</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">SetterFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token annotation punctuation">@Override</span>
+            <span class="token keyword">public</span> HystrixCommand<span class="token punctuation">.</span>Setter <span class="token function">create</span><span class="token punctuation">(</span>Target<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token operator">></span> target<span class="token punctuation">,</span> Method method<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> HystrixCommand<span class="token punctuation">.</span>Setter
+                        <span class="token punctuation">.</span><span class="token function">withGroupKey</span><span class="token punctuation">(</span>HystrixCommandGroupKey<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">asKey</span><span class="token punctuation">(</span>MessageService<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">.</span><span class="token function">getSimpleName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token comment" spellcheck="true">// MessageService下的所有方法的Hystrix Configuration</span>
+                        <span class="token punctuation">.</span><span class="token function">andCommandPropertiesDefaults</span><span class="token punctuation">(</span>
+                                HystrixCommandProperties<span class="token punctuation">.</span><span class="token function">Setter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">withExecutionTimeoutInMilliseconds</span><span class="token punctuation">(</span><span class="token number">10000</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">// 超时配置</span>
+                        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>参考：<a href="https://segmentfault.com/a/11900000098499322、" target="_blank" rel="noopener">https://segmentfault.com/a/11900000098499322、</a></p>
+<h2 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h2><ul>
+<li>只有开启了circuitBreaker.enabled,才会监控断路器并判断是否打开。默认开启着</li>
+<li>几个相关参数示例<pre class="line-numbers language-java"><code class="language-java"><span class="token annotation punctuation">@HystrixCommand</span><span class="token punctuation">(</span>fallbackMethod <span class="token operator">=</span> <span class="token string">"paymentCircuitBreaker_fallback"</span><span class="token punctuation">,</span>commandProperties <span class="token operator">=</span> <span class="token punctuation">{</span>
+      <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"circuitBreaker.enabled"</span><span class="token punctuation">,</span>value <span class="token operator">=</span> <span class="token string">"true"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>    <span class="token comment" spellcheck="true">//是否开启监控curcuit</span>
+      <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"circuitBreaker.requestVolumeThreshold"</span><span class="token punctuation">,</span>value <span class="token operator">=</span> <span class="token string">"2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"circuitBreaker.sleepWindowInMilliseconds"</span><span class="token punctuation">,</span>value <span class="token operator">=</span> <span class="token string">"10000"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"circuitBreaker.errorThresholdPercentage"</span><span class="token punctuation">,</span>value <span class="token operator">=</span> <span class="token string">"60"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token annotation punctuation">@HystrixProperty</span><span class="token punctuation">(</span>name<span class="token operator">=</span><span class="token string">"metrics.rollingStats.timeInMilliseconds"</span><span class="token punctuation">,</span>value<span class="token operator">=</span><span class="token string">"10000"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> String <span class="token function">paymentCircuitBreaker</span><span class="token punctuation">(</span>Integer id<span class="token punctuation">)</span><span class="token punctuation">{</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>id<span class="token operator">&lt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeException</span><span class="token punctuation">(</span><span class="token string">"id 不能为负数"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> Thread<span class="token punctuation">.</span><span class="token function">currentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">"调用成功"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">XIANG HU</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://yoursite.com/2020/07/15/%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E7%AF%87%EF%BC%9Ahystrix/">http://yoursite.com/2020/07/15/%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E7%AF%87%EF%BC%9Ahystrix/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">XIANG HU</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/SpringCloud/">
+                                    <span class="chip bg-color">SpringCloud</span>
+                                </a>
+                            
+                                <a href="/tags/hystrix/">
+                                    <span class="chip bg-color">hystrix</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2020/07/15/%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3%E7%AF%87%E2%80%94%E2%80%94Spring-Cloud-Gateway%EF%BC%9A%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="服务网关篇——Spring Cloud Gateway：简单使用">
+                        
+                        <span class="card-title">服务网关篇——Spring Cloud Gateway：简单使用</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            SpringCloud Gate的简单介绍及使用
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2020-07-15
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/SpringCloud/" class="post-category">
+                                    SpringCloud
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/SpringCloud/">
+                        <span class="chip bg-color">SpringCloud</span>
+                    </a>
+                    
+                    <a href="/tags/Gateway/">
+                        <span class="chip bg-color">Gateway</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2020/07/15/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AF%87%E2%80%94%E2%80%94springCloud-Ribbon%EF%BC%9A%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="负载均衡篇——springCloud Ribbon：简单使用">
+                        
+                        <span class="card-title">负载均衡篇——springCloud Ribbon：简单使用</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            springcloud Ribbon的简单使用
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2020-07-15
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/SpringCloud/" class="post-category">
+                                    SpringCloud
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/SpringCloud/">
+                        <span class="chip bg-color">SpringCloud</span>
+                    </a>
+                    
+                    <a href="/tags/Ribbon/">
+                        <span class="chip bg-color">Ribbon</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+<!-- 代码块折行 -->
+
+<style type="text/css">
+code[class*="language-"], pre[class*="language-"] { white-space: pre !important; }
+</style>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">XIANG HU</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            
+            
+            
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/xianghu-xiaokachekkk" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1791964653@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1791964653" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1791964653" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/search.xml", 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
